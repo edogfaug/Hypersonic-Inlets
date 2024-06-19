@@ -1,0 +1,160 @@
+## Given functions provided by W&M
+# Needed as pre req for other coding functions used
+
+import matplotlib.pyplot as plt
+import csv
+import math
+import numpy as np
+
+def xy(ethetas):
+    thetas = np.cumsum(ethetas)
+    xs = np.arange(0,len(ethetas))
+    ys = np.repeat(-1.0,len(ethetas))
+    ys[0] = 0
+    tans = np.tan(thetas*np.pi/180)
+    for i in range(1,len(ys)):
+        updt = ys[i-1] + tans[i]
+        ys[i] = updt
+
+    return xs,ys
+
+# effective thetas
+def thetas(x, y):
+    theta = np.repeat(-1.0,len(x))
+    theta[0] = 0.0
+    for i in range(1,len(x)):
+        s = np.sum(theta[:i])
+        theta[i] = math.atan((y[i] - y[i-1]) / (x[i] - x[i-1]) ) * 180/math.pi
+        theta[i] = theta[i] - s
+
+    if np.any(np.array(theta) < 0):
+        raise Exception("Negative angles.")
+    return theta
+
+def plot_inlet(angles,flip=True):
+    xs,ys = xy(angles)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ys = np.max(ys)-ys
+    for i in range(len(xs)):
+        ax.plot(xs[i:(i+2)],ys[i:(i+2)]);
+
+    ax.hlines(np.max(ys),0,np.max(xs)*1.25)
+    ax.hlines(np.min(ys),np.max(xs),np.max(xs)*1.25)
+    ax.hlines(np.min(ys),np.max(xs),np.max(xs)*1.25)
+    ax.hlines(-0.1*(np.max(ys)-np.min(ys)),0.9*np.max(xs),np.max(xs)*1.25)
+
+    ax.set_aspect('equal', adjustable='box')
+    return fig, ax
+
+et = np.array([0,1,1,1])
+
+plt.rcParams["figure.figsize"] = (20,10)
+plot_inlet(et)
+
+et = np.array([0,1,2,3,4,5,6,7,8,9,10])
+plt.rcParams["figure.figsize"] = (20,10)
+plot_inlet(et)
+
+## HELPER FUNCTIONS
+
+import pandas as pd
+from itertools import product
+import numpy as np
+
+from scipy.optimize import minimize_scalar
+
+#Prandtl-Meyer
+def nu(M, gamma):
+    return math.sqrt((gamma + 1) / (gamma - 1)) * math.atan(
+        math.sqrt((gamma - 1) / (gamma + 1) * (M ** 2 - 1))) - math.atan(math.sqrt(M ** 2 - 1))
+
+def expansion_mach(M1,theta,gamma):
+    A = theta*math.pi/180+nu(M1,gamma)
+    loss = lambda M2: (nu(M2,gamma)-A)**2
+    res = minimize_scalar(loss, bounds=(1, 10), method='bounded')
+    return(res.x)
+
+def expansion_p(p1,M1,M2,gamma):
+    top = 1+(gamma-1)/2*M1**2
+    bottom = 1+(gamma-1)/2*M2**2
+    r = (top/bottom)**(gamma/(gamma-1))
+    return p1*r
+
+def compression_beta(theta, mach, gamma):
+    n = 0 # 0 = weak shock, 1 = strong shock
+    theta = theta * math.pi/180.0;
+    mu = math.asin(1/mach);
+    c = math.tan(mu)**2;
+    a = ((gamma-1)/2 + (gamma+1) * c/2) * math.tan(theta);
+    b = ((gamma+1)/2 + (gamma+3) * c/2) * math.tan(theta);
+    d = math.sqrt(4*(1-3*a*b)**3/((27*a**2*c+9*a*b-2)**2)-1);
+    beta = math.atan((b+9*a*c)/(2*(1-3*a*b))-(d*(27*a**2*c+9*a*b-2))/(6*a*(1-3*a*b))*math.tan(n*math.pi/3+1/3*math.atan(1/d)))*180.0/math.pi
+    return beta
+
+def compression_mach(mach1, theta, beta, gamma):
+    theta = theta * math.pi/180.0;
+    beta = beta * math.pi/180.0;
+    mach2 = (1/math.sin(beta - theta)) * math.sqrt((1 + 0.5*(gamma-1)*mach1**2*math.sin(beta)**2)/(gamma*mach1**2*math.sin(beta)**2 - 0.5*(gamma-1)))
+    return mach2
+
+def p_to_p_tot(p, mach, gamma):
+    p_tot = p / ((1 + 0.5*(gamma-1)*mach**2)**(-1*gamma / (gamma-1)))
+    return p_tot
+
+def compression_p(mach1, p1, beta, gamma):
+    beta = beta * math.pi/180.0
+    p2 = p1*((2*gamma*mach1**2*math.sin(beta)**2 - (gamma-1)) / (gamma+1))
+    return p2
+
+## RUN MODEL
+
+def run_model(mach_inf,p_inf,angles,aoa=0,gamma=1.4,verbose=False):
+
+    x,y = xy(angles)
+
+    mach = []
+    beta = []
+    p = []
+    p_tot = []
+
+    # Initialize Region 0
+    mach.append(mach_inf)
+    beta.append(0)
+    p.append(p_inf)
+    p_tot.append(p_to_p_tot(p[0], mach[0], gamma))
+
+    theta = thetas(x, y)
+    effective_theta = theta#[theta[0], theta[1]+aoa, theta[2], theta[3], theta[4], theta[5]]
+    effective_theta[1] = effective_theta[1] + aoa
+    if np.sum(effective_theta[:-1])>=90:
+        raise Exception("Sum of effective angles is bigger than 90.")
+
+
+    # Solve for Regions 1 through 5
+    for i in range(1, len(theta)):
+        beta.append(compression_beta(effective_theta[i], mach[i-1], gamma))
+        mach.append(compression_mach(mach[i-1], effective_theta[i], beta[i], gamma))
+        p.append(compression_p(mach[i-1], p[i-1], beta[i], gamma))
+        p_tot.append(p_to_p_tot(p[i], mach[i], gamma))
+
+    if verbose:
+        print(mach)
+        print(beta)
+        print(p)
+        print(p_tot)
+
+    mach_output = mach[len(mach)-1]
+    p_tot_output = p_tot[len(p_tot)-1]
+    p_tot_inf = p_inf/((1+mach_inf**2*(gamma-1)/2)**(-gamma/(gamma-1)))
+
+    return {'mach':mach_output, 'pr':p_tot_output/p_tot_inf}
+
+et = np.array([0,1,1,1,1])
+plot_inlet(et);
+
+run_model(mach_inf=5,p_inf=5532,angles=et)
+
+et = np.array([0,1,2,3,4,5,6,7,8,9,10])
+plot_inlet(et);
+run_model(mach_inf=5,p_inf=5532,angles=et)
