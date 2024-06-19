@@ -1,0 +1,93 @@
+##3D HEATMAP FOR 3 DIFFERENT ANGLES AND ITS AFFECT ON MACH SPEED
+# pre req code needed for these plots : function run_model located in given functions and its output : 'mach'
+
+%matplotlib inline
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import numpy as np
+from pylab import *
+
+L = np.linspace(1,10,10)
+H = np.linspace(1,10,1000)
+mach_matrix = []
+for i in L:
+  row = []
+  for j in L:
+    column = []
+    for k in L:
+      et = np.array([0,i,j,k,i])
+      result = run_model(mach_inf=5, p_inf=5532, angles=et)
+      row.append(result['mach'])
+    column.append(row)
+  mach_matrix.append(column)
+
+I = np.arange(1,11)
+J = np.arange(1,11)
+K = np.arange(1,11)  
+
+I, J, K = np.meshgrid(I, J, K)
+
+I = I.flatten()
+J = J.flatten()
+K = K.flatten()
+
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection='3d')
+
+colo=np.array(mach_matrix).flatten()
+color_map = cm.ScalarMappable(cmap=cm.Greens_r) 
+color_map.set_array(colo)
+img = ax.scatter(I, J, K, marker='o', 
+                  s=111, color='green') 
+plt.colorbar(color_map) 
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+plt.show()
+
+## 3D MODEL FOR 3 DIFFERENT ANGLES AND ITS AFFECT ON PRESSURE
+# pre req code needed for this plot : function run_model located in given functions and its output : 'pr'
+
+%matplotlib inline
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import numpy as np
+from pylab import *
+
+L = np.linspace(1,10,10)
+H = np.linspace(1,10,1000)
+pr_matrix = []
+for i in L:
+  row = []
+  for j in L:
+    column = []
+    for k in L:
+      et = np.array([0,i,j,k,i])
+      result = run_model(mach_inf=5, p_inf=5532, angles=et)
+      row.append(result['pr'])
+    column.append(row)
+  pr_matrix.append(column)
+
+I = np.arange(1,11)
+J = np.arange(1,11)
+K = np.arange(1,11)  
+
+I, J, K = np.meshgrid(I, J, K)
+
+I = I.flatten()
+J = J.flatten()
+K = K.flatten()
+
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection='3d')
+
+colo=np.array(pr_matrix).flatten()
+color_map = cm.ScalarMappable(cmap=cm.Greens_r) 
+color_map.set_array(colo)
+img = ax.scatter(I, J, K, marker='o', 
+                  s=111, color='green') 
+plt.colorbar(color_map) 
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+plt.show()
