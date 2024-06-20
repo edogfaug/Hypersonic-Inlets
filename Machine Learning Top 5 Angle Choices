@@ -1,0 +1,113 @@
+## Mach Number and Pressure for Every Angle Combination (for 4 different angles)
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+L = np.linspace(1,10,10)
+# H = np.linspace(1,10,10000)
+
+pr_matrix = []
+mach_matrix = []
+master_matrix = []
+identity_column = []
+
+for i in L:
+  row = []
+  rowm = []
+  for j in L:
+    column = []
+    columnm = []
+    for k in L:
+      vector = []
+      vectorm = []
+      for l in L:
+        #4 Different Inputs, Add more if continuing this design
+        et = np.array([0,i,j,k,l])
+        result = run_model(mach_inf=5, p_inf=5532, angles=et)
+        vector.append(result['pr'])
+        vectorm.append(result['mach'])
+        identity_column.append(et)
+      row.append(vector)
+      rowm.append(vectorm)
+    column.append(row)
+    columnm.append(rowm)
+  pr_matrix.append(column)
+  mach_matrix.append(columnm)
+
+pr = np.array(pr_matrix).flatten()
+m = np.array(mach_matrix).flatten()
+id = np.vstack(identity_column)
+
+master_matrix = np.column_stack((id, pr, m))
+
+# Print top 25 results to prove working condition
+#print(master_matrix[0:25])
+
+## Machine Learning and Training for the Master Matrix Built Above
+
+import numpy as np
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+# Pressure column is 6 and mach number is column 7 (known variables)
+# Location vectors are columns 1 through 5 (looking for these, test variables)
+
+X = master_matrix[:, [5, 6]]  
+y = master_matrix[:, :5]      
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = keras.Sequential([
+    layers.Dense(64, activation='relu', input_shape=(2,)),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(5)  
+])
+
+model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+
+history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2)
+
+# Calibrated test number to best fit output to 2.5 (model will tend to go under in order to increase pressure and variability in the first location address)
+test_mach_number = 2.61
+X_test_mach = np.copy(X_test)
+X_test_mach[:, 1] = test_mach_number  
+
+predicted_locations = model.predict(X_test_mach)
+
+sorted_indices = np.argsort(-X_test[:, 0])
+sorted_locations = predicted_locations[sorted_indices]
+
+top_locations = sorted_locations[:10]
+#print(top_locations)
+
+## Take top 10 locations, fit them down to top 5, print locations alongside their mach number and pressure they produce
+
+mach_vectors = []
+pressure_vectors = []
+
+# Top 5 Angles, change if you want more
+for i in range(5):  
+    corrected_locations = top_locations[i, 1:].flatten()
+    et = np.array([0] + list(corrected_locations))
+    result = run_model(mach_inf=5, p_inf=5532, angles=et)
+    mach_vectors.append(result['mach'])
+    pressure_vectors.append(result['pr'])
+
+top5 = [top_locations[0,1:].tolist(), mach_vectors[0],
+        top_locations[1,1:].tolist(), mach_vectors[1],
+        top_locations[2,1:].tolist(), mach_vectors[2],
+        top_locations[3,1:].tolist(), mach_vectors[3],
+        top_locations[4,1:].tolist(), mach_vectors[4]]
+
+# Add more if needed more than top 5
+print("Top 5:")        
+print("1. Angles:", [0, top_locations[0,1:].tolist()], "Mach Speed:", mach_vectors[0], "Pressure:", pressure_vectors[0])
+print("2. Angles:", [0, top_locations[1,1:].tolist()], "Mach Speed:", mach_vectors[1], "Pressure:", pressure_vectors[1])
+print("3. Angles:", [0, top_locations[2,1:].tolist()], "Mach Speed:", mach_vectors[2], "Pressure:", pressure_vectors[2])
+print("4. Angles:", [0, top_locations[3,1:].tolist()], "Mach Speed:", mach_vectors[3], "Pressure:", pressure_vectors[3])
+print("5. Angles:", [0, top_locations[4,1:].tolist()], "Mach Speed:", mach_vectors[4], "Pressure:", pressure_vectors[4])
+
+## As you can see in this section, there is an error in the model production such that the first number of the location cannot be set to zero. There is inherent error in this code, so the variability
+# cont. has been calibrated in the variable known as test_mach_number (2.61 = 2.5). The last section tries to fix this by replacing the first number with zero when calculating mach and pressure.
