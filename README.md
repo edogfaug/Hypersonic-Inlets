@@ -4,9 +4,9 @@
 ### How to use:
 
 Final 2 codes for submission are tabbed with 'Finished code' and both serve different purposes:
-'Optimizer_for_any_#_of_angle_with_adaptive_neural_network'
+*'Optimizer_for_any_#_of_angle_with_adaptive_neural_network'*
 
-'Optimizer_for_any_#_of_angle_with_neural_network_condensor'
+*'Optimizer_for_any_#_of_angle_with_neural_network_condensor'*
 #
 To use inlet optimizing code with no computational resource contraints
   use the 'angle optimization with adaptive neural network' code
