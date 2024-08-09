@@ -15,9 +15,13 @@ To use inlet optimization with computational resource contraints (slight accurac
   use the 'angle optimization with neural network condensor' code
 # 
 'Automated Optimal Angle Finder for Vehicle Underbelly' : Initial test for a fully automated user interface with 4 independant variable
+
 'User_Interface_ALPHACODE' : Final prototype for a fully automated user interface
+
 'Surrogate_Model_ALPHACODE' : Final prototype for the neural network and SOLIDWORKS automation with a 4 angle input
+
 'Single and Double Angle Adjustments to Mach Number and Pressure at Inlet' : Inital trend testing, 2 angle combinations
+
 'Initial_Prototyping_and_Graphs' : Secondary testing to find trends in our data, includes many angle combinations
 
 #
