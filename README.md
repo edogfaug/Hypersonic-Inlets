@@ -2,8 +2,7 @@
 ### References and usage credit can be given to Ethan Gaul and Maddie Sablan
 
 Results of testing turned into Air Force in conjuction with NASA Langley
-#
-How to use:
+### How to use:
 
 Final 2 codes for submission are tabbed with 'Finished code' and both serve different purposes:
 'Optimizer_for_any_#_of_angle_with_adaptive_neural_network'
