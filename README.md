@@ -1,7 +1,6 @@
 # The Hypersonic-Inlets Repository is a collection of code made for Hyperstats William & Mary Summer Research.
 ### References and usage credit can be given to Ethan Gaul and Maddie Sablan
 
-Results of testing turned into Air Force in conjuction with NASA Langley
 ### How to use:
 
 Final 2 codes for submission are tabbed with 'Finished code' and both serve different purposes:
