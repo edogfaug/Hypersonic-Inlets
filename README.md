@@ -1,10 +1,12 @@
 # The Hypersonic-Inlets Repository is a collection of code made for Hyperstats William & Mary Summer Research.
-## References and usage credit can be given to Ethan Gaul
+## References and usage credit can be given to Ethan Gaul and Maddie Sablan
 ### Results of testing turned into Air Force in conjuction with NASA Langley
 #
 How to use:
 
 Final 2 codes for submission are tabbed with 'Finished code' and both serve different purposes.
+'Optimizer_for_any_#_of_angle_with_adaptive_neural_network'
+'Optimizer_for_any_#_of_angle_with_neural_network_condensor'
 #
 To use inlet optimizing code with no computational resource contraints
   use the 'angle optimization with adaptive neural network' code
@@ -12,6 +14,13 @@ To use inlet optimizing code with no computational resource contraints
 To use inlet optimization with computational resource contraints (slight accuracy loss)
   use the 'angle optimization with neural network condensor' code
 # 
+'Automated Optimal Angle Finder for Vehicle Underbelly' : Initial test for a fully automated user interface with 4 independant variable
+'User_Interface_ALPHACODE' : Final prototype for a fully automated user interface
+'Surrogate_Model_ALPHACODE' : Final prototype for the neural network and SOLIDWORKS automation with a 4 angle input
+'Single and Double Angle Adjustments to Mach Number and Pressure at Inlet' : Inital trend testing, 2 angle combinations
+'Initial_Prototyping_and_Graphs' : Secondary testing to find trends in our data, includes many angle combinations
+
+#
 Coding Research:
 
 Hypersonic inlets have many factors to account for when designing, which makes it challenging to do. An inherent issue of a hypersonic inlet is its relationship between air speed and pressure. Generally speaking, as airspeed decreases through the inlet, relative pressure also decreases. Since the combustor and injector are optimized by having a higher relative pressure and lower air speed, this paper discusses how we achieve these conditions (2.5 Mach number through the combustor with an input Mach number of 5; pressure ratio as close to 1 as possible to reflect minimal loss) by adjusting the inlet geometry and shape. We define our model as efficient when it is able to produce results where Mach speed is 2.50 (with significant figures) and pressure ratio is maximized.
