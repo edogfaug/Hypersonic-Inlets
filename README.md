@@ -13,6 +13,7 @@ To use inlet optimizing code with no computational resource contraints
 # 
 To use inlet optimization with computational resource contraints (slight accuracy loss)
   use the 'angle optimization with neural network condensor' code
+  
 ### Proof of Concept Code
 'Automated Optimal Angle Finder for Vehicle Underbelly' : Initial test for a fully automated user interface with 4 independant variable
 
